@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Turbo Addition: Race Track</title>
+    <title>Let's Race!</title>
     <!-- Tailwind CSS for Styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React and ReactDOM -->
@@ -190,7 +190,8 @@
                     speak(`Great Job! ${problem.a} plus ${problem.b} is ${ans}!`);
                 } else {
                     setGameState('ERROR');
-                    speak(`Try Again! Move the car to ${ans}!`);
+                    setCurrentPos(problem.a); // Reset car to the starting position
+                    speak(`Try Again! Back to the start at ${problem.a}!`);
                 }
             };
 
@@ -219,13 +220,16 @@
                     
                     {/* Header */}
                     <header className="flex-none flex justify-between items-center bg-white/90 p-2 md:p-3 rounded-xl md:rounded-2xl shadow-sm border-b-2 border-slate-200 z-10">
-                        <div className="flex items-center gap-2 bg-slate-50 px-2 md:px-3 py-1.5 rounded-xl border border-slate-100">
+                        <div className="flex items-center gap-2 bg-slate-50 px-2 md:px-3 py-1.5 rounded-xl border border-slate-100 w-24 md:w-32">
                             <div className="bg-yellow-400 p-1.5 rounded-lg"><TrophyIcon /></div>
                             <span className="text-xl md:text-2xl font-black text-slate-700">{score}</span>
                         </div>
-                        <button onClick={() => setView('SELECT')} className="bg-slate-100 p-2 md:p-3 rounded-xl active:bg-slate-200 transition-colors">
-                            <RefreshIcon />
-                        </button>
+                        <h1 className="text-2xl md:text-4xl font-black italic text-blue-600 uppercase tracking-tight">Let's Race!</h1>
+                        <div className="w-24 md:w-32 flex justify-end">
+                            <button onClick={() => setView('SELECT')} className="bg-slate-100 p-2 md:p-3 rounded-xl active:bg-slate-200 transition-colors">
+                                <RefreshIcon />
+                            </button>
+                        </div>
                     </header>
 
                     {/* Main Arena: Flex-grow correctly distributes space */}
@@ -252,23 +256,32 @@
                         <div className="flex-grow"></div>
 
                         {/* 2. Race Track Area */}
-                        <div className="flex-none w-full px-2 sm:px-6 relative h-28 md:h-36 flex flex-col justify-end">
+                        <div className="flex-none w-full px-2 sm:px-6 relative h-32 md:h-44 flex flex-col justify-end">
                             {/* Road */}
-                            <div className="absolute inset-x-2 md:inset-x-6 bottom-1 h-10 md:h-12 bg-slate-800 rounded-full border-y-2 border-slate-700 flex items-center shadow-inner overflow-hidden">
+                            <div className="absolute inset-x-2 md:inset-x-6 bottom-1 h-16 md:h-20 bg-slate-800 rounded-full border-y-2 border-slate-700 flex items-center shadow-inner overflow-hidden">
                                 <div className="w-full h-0.5 border-t-2 border-dashed border-white/20" />
                             </div>
                             {/* Numbers */}
-                            <div className="absolute inset-x-2 md:inset-x-6 bottom-1 h-10 md:h-12 flex justify-between px-4 md:px-6 items-center">
+                            <div className="absolute inset-x-2 md:inset-x-6 bottom-1 h-16 md:h-20 flex justify-between px-4 md:px-6 items-center">
                                 {[...Array(11)].map((_, i) => (
                                     <div key={i} className="flex flex-col items-center">
-                                        <div className={`w-0.5 md:w-1 h-2 md:h-3 mb-0.5 rounded-full ${i === currentPos ? 'bg-yellow-400 h-5 md:h-6 w-1 md:w-1.5' : 'bg-white/40'}`} />
-                                        <span className={`text-[11px] md:text-sm font-black ${i === currentPos ? 'text-yellow-400 scale-125' : 'text-slate-400'}`}>{i}</span>
+                                        <div className={`w-0.5 md:w-1 h-3 md:h-4 mb-0.5 rounded-full ${i === currentPos ? 'bg-yellow-400 h-8 md:h-10 w-1.5 md:w-2' : 'bg-white/40'}`} />
+                                        <span className={`text-sm md:text-xl font-black ${i === currentPos ? 'text-yellow-400 scale-125' : 'text-slate-400'}`}>{i}</span>
                                     </div>
                                 ))}
                             </div>
-                            {/* The Vehicle - Lifted up to bottom-14 (Mobile) / bottom-16 (Desktop) to clear the road fully */}
-                            <div className="absolute bottom-14 md:bottom-16 car-transition z-20 flex flex-col items-center" style={{ left: `calc(${(currentPos / 10) * 100}% - 4px)`, width: '90px', transform: 'translateX(-50%)' }}>
-                                {gameState === 'ERROR' && <div className="absolute -top-10"><div className="smoke bg-slate-400 w-3 h-3 rounded-full mb-1 ml-2" /><div className="smoke bg-slate-500 w-5 h-5 rounded-full" /></div>}
+                            {/* The Vehicle - Lifted up to bottom-20 (Mobile) / bottom-24 (Desktop) to clear the taller road */}
+                            <div className="absolute bottom-20 md:bottom-24 car-transition z-20 flex flex-col items-center" style={{ left: `calc(${(currentPos / 10) * 100}% - 4px)`, width: '90px', transform: 'translateX(-50%)' }}>
+                                {gameState === 'ERROR' && (
+                                    <div className="absolute -top-10 left-4 pointer-events-none">
+                                        <div className="smoke bg-slate-400 w-5 h-5 rounded-full absolute bottom-0 left-[-10px]" style={{animationDelay: '0s'}}></div>
+                                        <div className="smoke bg-slate-500 w-6 h-6 rounded-full absolute bottom-2 left-[5px]" style={{animationDelay: '0.2s'}}></div>
+                                        <div className="smoke bg-slate-600 w-7 h-7 rounded-full absolute bottom-5 left-[-15px]" style={{animationDelay: '0.4s'}}></div>
+                                        <div className="smoke bg-slate-400 w-6 h-6 rounded-full absolute bottom-1 left-[15px]" style={{animationDelay: '0.1s'}}></div>
+                                        <div className="smoke bg-slate-700 w-8 h-8 rounded-full absolute bottom-8 left-[-5px]" style={{animationDelay: '0.5s'}}></div>
+                                        <div className="smoke bg-slate-500 w-9 h-9 rounded-full absolute bottom-10 left-[10px]" style={{animationDelay: '0.3s'}}></div>
+                                    </div>
+                                )}
                                 <Vehicle wheelRotation={wheelRotation} isBroken={gameState === 'ERROR'} />
                                 {gameState === 'ERROR' && <div className="mt-1 px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full uppercase animate-bounce shadow-md">Oops!</div>}
                             </div>
