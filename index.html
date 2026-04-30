@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Turbo Addition: Race Track</title>
     <!-- Tailwind CSS for Styling -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,6 +12,14 @@
     <!-- Babel for JSX compilation in browser -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
+        /* Prevent bounce scrolling on iOS */
+        html, body {
+            position: fixed;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+
         @keyframes smoke {
             0% { transform: translateY(0) scale(0.5); opacity: 0.8; }
             100% { transform: translateY(-60px) scale(2.5); opacity: 0; }
@@ -27,9 +35,16 @@
         .celebration-star {
             animation: star-burst 1.5s ease-out forwards;
         }
+        
+        /* Smooth transitions for responsive layout changes */
+        .transition-all {
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
     </style>
 </head>
-<body class="bg-sky-100">
+<body class="bg-sky-100 touch-none">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -37,16 +52,16 @@
 
         // --- Custom Icons ---
         const TrophyIcon = () => (
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white md:w-8 md:h-8"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
         );
         const RefreshIcon = () => (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-6 md:h-6"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
         );
         const GasIcon = () => (
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="md:w-12 md:h-12"><path d="m9 18 6-6-6-6"/></svg>
         );
         const CheckIcon = () => (
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="md:w-16 md:h-16"><path d="M20 6 9 17l-5-5"/></svg>
         );
         const StarIcon = ({ size = 24, color = "currentColor" }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -56,19 +71,19 @@
         const Celebration = () => {
             const stars = useMemo(() => {
                 const colors = ['#facc15', '#f87171', '#60a5fa', '#4ade80', '#c084fc', '#fb923c'];
-                return Array.from({ length: 40 }).map((_, i) => ({
+                return Array.from({ length: 30 }).map((_, i) => ({
                     id: i,
                     color: colors[Math.floor(Math.random() * colors.length)],
-                    tx: (Math.random() - 0.5) * 800 + 'px',
-                    ty: (Math.random() - 0.7) * 500 + 'px',
+                    tx: (Math.random() - 0.5) * 400 + 'px',
+                    ty: (Math.random() - 0.7) * 400 + 'px',
                     tr: Math.random() * 720 + 'deg',
-                    delay: Math.random() * 0.8 + 's',
-                    size: Math.random() * 25 + 15
+                    delay: Math.random() * 0.5 + 's',
+                    size: Math.random() * 15 + 15
                 }));
             }, []);
 
             return (
-                <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-50">
+                <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-50 overflow-hidden">
                     {stars.map(star => (
                         <div 
                             key={star.id} 
@@ -100,7 +115,7 @@
                 id: 'SPOILER',
                 name: 'Type R Racer',
                 component: ({ wheelRotation, isBroken }) => (
-                    <svg viewBox="0 0 120 60" className={`w-32 h-16 transition-transform ${isBroken ? 'animate-bounce' : ''}`}>
+                    <svg viewBox="0 0 120 60" className={`w-24 h-12 md:w-32 md:h-16 transition-transform ${isBroken ? 'animate-bounce' : ''}`}>
                         <path d="M5 15 L25 15 L22 0 L8 0 Z" fill="#111" transform="translate(5, 5)" />
                         <rect x="12" y="5" width="2" height="10" fill="#333" />
                         <rect x="25" y="5" width="2" height="10" fill="#333" />
@@ -117,7 +132,7 @@
                 id: 'BULLET',
                 name: 'Blue Bullet',
                 component: ({ wheelRotation, isBroken }) => (
-                    <svg viewBox="0 0 120 60" className={`w-32 h-16 transition-transform ${isBroken ? 'animate-bounce' : ''}`}>
+                    <svg viewBox="0 0 120 60" className={`w-24 h-12 md:w-32 md:h-16 transition-transform ${isBroken ? 'animate-bounce' : ''}`}>
                         <path d="M5 45 Q 5 15, 60 15 L110 22 Q 120 25, 120 45 Z" fill="#3b82f6" />
                         <path d="M10 15 L40 15 L35 5 L15 5 Z" fill="#1e40af" />
                         <path d="M65 20 L95 20 L90 28 L65 28 Z" fill="#1e293b" opacity="0.8" />
@@ -131,9 +146,8 @@
                 id: 'MONSTER',
                 name: 'Speedy Bus',
                 component: ({ wheelRotation, isBroken }) => (
-                    <svg viewBox="0 0 120 80" className={`w-32 h-20 transition-transform ${isBroken ? 'animate-bounce' : ''}`}>
+                    <svg viewBox="0 0 120 80" className={`w-24 h-16 md:w-32 md:h-20 transition-transform ${isBroken ? 'animate-bounce' : ''}`}>
                         <rect x="10" y="5" width="100" height="50" rx="4" fill="#22c55e" />
-                        {/* Windows updated to dark grey */}
                         <rect x="15" y="10" width="15" height="12" rx="2" fill="#1e293b" opacity="0.8" />
                         <rect x="35" y="10" width="15" height="12" rx="2" fill="#1e293b" opacity="0.8" />
                         <rect x="55" y="10" width="15" height="12" rx="2" fill="#1e293b" opacity="0.8" />
@@ -144,7 +158,6 @@
                         <rect x="75" y="30" width="25" height="18" rx="2" fill="#1e293b" opacity="0.95" />
                         <path d="M10 5 L35 5 L30 -5 L5 -5 Z" fill="#166534" />
                         <rect x="105" y="45" width="5" height="8" fill="#facc15" />
-                        {/* Wheels updated to size 10 to match car */}
                         <Wheel x={30} y={55} r={10} rotation={wheelRotation} />
                         <Wheel x={90} y={55} r={10} rotation={wheelRotation} />
                     </svg>
@@ -153,16 +166,16 @@
         };
 
         const SmokeParticles = () => (
-            <div className="absolute -top-16 left-1/2 -translate-x-1/2 pointer-events-none">
+            <div className="absolute -top-12 left-1/2 -translate-x-1/2 pointer-events-none">
                 {[...Array(5)].map((_, i) => (
                     <div 
                         key={i}
                         className="absolute bg-slate-400 rounded-full smoke-particle opacity-0"
                         style={{
-                            width: `${15 + i * 5}px`,
-                            height: `${15 + i * 5}px`,
+                            width: `${10 + i * 4}px`,
+                            height: `${10 + i * 4}px`,
                             animationDelay: `${i * 0.2}s`,
-                            left: `${(i - 2) * 12}px`
+                            left: `${(i - 2) * 10}px`
                         }}
                     />
                 ))}
@@ -226,19 +239,19 @@
 
             if (view === 'SELECT') {
                 return (
-                    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-white font-sans">
-                        <h1 className="text-4xl md:text-6xl font-black mb-12 italic tracking-tighter text-yellow-400 text-center uppercase">Choose Your Vehicle</h1>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
+                    <div className="h-screen bg-slate-900 flex flex-col items-center justify-center p-4 text-white font-sans overflow-y-auto">
+                        <h1 className="text-3xl md:text-6xl font-black mb-8 italic tracking-tighter text-yellow-400 text-center uppercase">Choose Your Vehicle</h1>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-5xl">
                             {Object.values(CarDesigns).map((car) => (
                                 <button 
                                     key={car.id}
                                     onClick={() => startRace(car.id)}
-                                    className="bg-slate-800 border-4 border-slate-700 hover:border-yellow-400 p-8 rounded-[2rem] transition-all transform hover:scale-105 group flex flex-col items-center"
+                                    className="bg-slate-800 border-4 border-slate-700 hover:border-yellow-400 p-4 md:p-8 rounded-3xl transition-all transform active:scale-95 group flex flex-col items-center"
                                 >
-                                    <div className="mb-6 h-24 flex items-center">
+                                    <div className="mb-4 h-16 md:h-24 flex items-center">
                                         <car.component wheelRotation={0} isBroken={false} />
                                     </div>
-                                    <span className="text-2xl font-black italic uppercase group-hover:text-yellow-400">{car.name}</span>
+                                    <span className="text-xl md:text-2xl font-black italic uppercase group-hover:text-yellow-400">{car.name}</span>
                                 </button>
                             ))}
                         </div>
@@ -249,85 +262,115 @@
             const ActiveCar = CarDesigns[selectedCar].component;
 
             return (
-                <div className="min-h-screen bg-sky-100 font-sans text-slate-800 p-4 flex flex-col items-center overflow-hidden">
+                <div className="h-screen bg-sky-100 font-sans text-slate-800 p-2 md:p-4 flex flex-col items-center overflow-hidden">
                     {gameState === 'SUCCESS' && <Celebration />}
                     
-                    <div className="w-full max-w-4xl flex justify-between items-center mb-8 bg-white/90 p-4 rounded-3xl shadow-sm border-b-4 border-slate-200">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-yellow-400 p-2 rounded-xl"><TrophyIcon /></div>
-                            <span className="text-3xl font-black">{score}</span>
+                    {/* Header */}
+                    <div className="w-full max-w-4xl flex justify-between items-center mb-4 bg-white/90 p-3 md:p-4 rounded-2xl md:rounded-3xl shadow-sm border-b-4 border-slate-200">
+                        <div className="flex items-center gap-2 md:gap-3">
+                            <div className="bg-yellow-400 p-1.5 md:p-2 rounded-lg md:rounded-xl shadow-inner">
+                                <TrophyIcon />
+                            </div>
+                            <span className="text-xl md:text-3xl font-black">{score}</span>
                         </div>
-                        <button onClick={() => setView('SELECT')} className="bg-slate-100 hover:bg-slate-200 p-3 rounded-2xl transition-colors text-slate-500">
+                        <button onClick={() => setView('SELECT')} className="bg-slate-100 hover:bg-slate-200 p-2 md:p-3 rounded-xl md:rounded-2xl transition-colors text-slate-500">
                             <RefreshIcon />
                         </button>
                     </div>
 
-                    <div className="w-full max-w-5xl bg-white rounded-[3rem] shadow-2xl p-8 relative flex flex-col items-center min-h-[600px]">
-                        <div className="flex items-center gap-6 mb-16">
-                            <div className="bg-blue-100 px-8 py-5 rounded-3xl border-b-8 border-blue-200">
-                                <span className="text-7xl md:text-9xl font-black text-blue-600">{problem.a}</span>
+                    {/* Main Game Card */}
+                    <div className="w-full flex-grow max-w-5xl bg-white rounded-[2rem] md:rounded-[3rem] shadow-xl p-4 md:p-8 relative flex flex-col items-center justify-between border-b-8 border-slate-200 mb-2 overflow-hidden">
+                        
+                        {/* Equation Display - Responsive Text Sizes */}
+                        <div className="flex items-center justify-center gap-2 md:gap-6 w-full py-4">
+                            <div className="bg-blue-100 px-4 md:px-8 py-3 md:py-5 rounded-2xl md:rounded-3xl border-b-4 md:border-b-8 border-blue-200">
+                                <span className="text-5xl sm:text-7xl md:text-9xl font-black text-blue-600 leading-none">{problem.a}</span>
                             </div>
-                            <span className="text-5xl font-black text-slate-300">+</span>
-                            <div className="bg-orange-100 px-8 py-5 rounded-3xl border-b-8 border-orange-200">
-                                <span className="text-7xl md:text-9xl font-black text-orange-600">{problem.b}</span>
+                            <span className="text-3xl md:text-5xl font-black text-slate-300">+</span>
+                            <div className="bg-orange-100 px-4 md:px-8 py-3 md:py-5 rounded-2xl md:rounded-3xl border-b-4 md:border-b-8 border-orange-200">
+                                <span className="text-5xl sm:text-7xl md:text-9xl font-black text-orange-600 leading-none">{problem.b}</span>
                             </div>
-                            <span className="text-5xl font-black text-slate-300">=</span>
-                            <div className={`px-8 py-5 rounded-3xl border-b-8 ${gameState === 'SUCCESS' ? 'bg-green-100 border-green-200' : 'bg-slate-50 border-slate-100'}`}>
-                                <span className={`text-7xl md:text-9xl font-black ${gameState === 'SUCCESS' ? 'text-green-600' : 'text-slate-200'}`}>
+                            <span className="text-3xl md:text-5xl font-black text-slate-300">=</span>
+                            <div className={`px-4 md:px-8 py-3 md:py-5 rounded-2xl md:rounded-3xl border-b-4 md:border-b-8 ${gameState === 'SUCCESS' ? 'bg-green-100 border-green-200' : 'bg-slate-50 border-slate-100'}`}>
+                                <span className={`text-5xl sm:text-7xl md:text-9xl font-black leading-none ${gameState === 'SUCCESS' ? 'text-green-600' : 'text-slate-200'}`}>
                                     {gameState === 'SUCCESS' ? (problem.a + problem.b) : '?'}
                                 </span>
                             </div>
                         </div>
 
-                        <div className="w-full h-56 relative mt-4 px-12">
-                            <div className="absolute inset-x-0 bottom-8 h-24 bg-slate-800 rounded-full border-y-4 border-slate-700 flex items-center shadow-inner">
-                                <div className="w-full h-1 border-t-2 border-dashed border-white/20" />
+                        {/* Track Area */}
+                        <div className="w-full h-40 md:h-56 relative px-4 md:px-12 flex flex-col justify-end pb-8">
+                            {/* Asphalt Road */}
+                            <div className="absolute inset-x-2 md:inset-x-8 bottom-4 md:bottom-8 h-16 md:h-24 bg-slate-800 rounded-full border-y-2 md:border-y-4 border-slate-700 flex items-center shadow-inner overflow-hidden">
+                                <div className="w-full h-0.5 md:h-1 border-t-2 border-dashed border-white/20" />
                             </div>
 
-                            <div className="absolute inset-x-0 bottom-8 h-24 flex justify-between px-12 items-center">
+                            {/* Markers and Numbers */}
+                            <div className="absolute inset-x-2 md:inset-x-8 bottom-4 md:bottom-8 h-16 md:h-24 flex justify-between px-4 md:px-8 items-center">
                                 {[...Array(11)].map((_, i) => (
                                     <div key={i} className="flex flex-col items-center relative">
-                                        <div className={`w-1 h-6 mb-1 rounded-full ${i === currentPos ? 'bg-yellow-400 h-10 w-2' : 'bg-white/30'}`} />
-                                        <span className={`text-2xl font-black transition-all ${i === currentPos ? 'text-yellow-400 scale-125' : 'text-slate-400'}`}>{i}</span>
+                                        <div className={`w-0.5 md:w-1 h-4 md:h-6 mb-1 rounded-full ${i === currentPos ? 'bg-yellow-400 h-8 md:h-10 w-1 md:w-2' : 'bg-white/30'}`} />
+                                        <span className={`text-sm md:text-2xl font-black transition-all ${i === currentPos ? 'text-yellow-400 scale-125' : 'text-slate-400'}`}>{i}</span>
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="absolute bottom-32 transition-all duration-500 ease-in-out" style={{ left: `${(currentPos / 10) * 100}%`, transform: 'translateX(-50%)', width: '128px' }}>
+                            {/* Car Wrapper */}
+                            <div 
+                                className="absolute bottom-24 md:bottom-32 transition-all duration-500 ease-in-out z-20" 
+                                style={{ 
+                                    left: `${(currentPos / 10) * 100}%`, 
+                                    transform: 'translateX(-50%)', 
+                                    width: '96px' 
+                                }}
+                            >
                                 {gameState === 'ERROR' && <SmokeParticles />}
                                 <div className="flex flex-col items-center">
                                     <ActiveCar wheelRotation={wheelRotation} isBroken={gameState === 'ERROR'} />
                                     {gameState === 'ERROR' && (
-                                        <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold mt-2 animate-bounce">ENGINE PROBLEM!</div>
+                                        <div className="bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] md:text-xs font-bold mt-1 animate-bounce whitespace-nowrap">TRY AGAIN!</div>
                                     )}
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex-1 w-full flex flex-col items-center justify-end gap-10 pb-6 mt-16">
+                        {/* Controls Container */}
+                        <div className="w-full flex flex-col items-center gap-6 md:gap-10 pb-4">
                             {gameState === 'SUCCESS' ? (
-                                <button onClick={generateProblem} className="bg-blue-600 hover:bg-blue-500 text-white text-4xl font-black px-16 py-8 rounded-[2.5rem] shadow-[0_12px_0_rgb(29,78,216)] active:translate-y-2 active:shadow-none flex items-center gap-4 animate-bounce">
+                                <button 
+                                    onClick={generateProblem} 
+                                    className="bg-blue-600 active:bg-blue-700 text-white text-2xl md:text-4xl font-black px-10 md:px-16 py-4 md:py-8 rounded-2xl md:rounded-[2.5rem] shadow-[0_8px_0_rgb(29,78,216)] active:translate-y-1 active:shadow-none transition-all animate-bounce"
+                                >
                                     NEXT RACE
                                 </button>
                             ) : (
-                                <div className="flex items-center gap-16">
-                                    <div className="flex flex-col items-center gap-4">
-                                        <button onClick={handleGas} className="w-36 h-36 bg-red-500 rounded-full shadow-[0_12px_0_rgb(185,28,28)] active:translate-y-2 active:shadow-none border-8 border-red-400 flex flex-col items-center justify-center text-white group">
+                                <div className="flex items-center gap-8 md:gap-16">
+                                    <div className="flex flex-col items-center gap-2 md:gap-4">
+                                        <button 
+                                            onClick={handleGas} 
+                                            className="w-24 h-24 md:w-36 md:h-36 bg-red-500 rounded-full shadow-[0_8px_0_rgb(185,28,28)] active:translate-y-1 active:shadow-none border-4 md:border-8 border-red-400 flex flex-col items-center justify-center text-white active:scale-95 transition-transform"
+                                        >
                                             <GasIcon />
-                                            <span className="font-black italic text-xl">GAS</span>
+                                            <span className="font-black italic text-sm md:text-xl">GAS</span>
                                         </button>
-                                        <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Move Car</span>
+                                        <span className="text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-widest">Move</span>
                                     </div>
-                                    <div className="flex flex-col items-center gap-4">
-                                        <button onClick={checkAnswer} className="w-36 h-36 bg-green-500 rounded-full shadow-[0_12px_0_rgb(21,128,61)] active:translate-y-2 active:shadow-none border-8 border-green-400 flex items-center justify-center text-white group">
+                                    <div className="flex flex-col items-center gap-2 md:gap-4">
+                                        <button 
+                                            onClick={checkAnswer} 
+                                            className="w-24 h-24 md:w-36 md:h-36 bg-green-500 rounded-full shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-none border-4 md:border-8 border-green-400 flex items-center justify-center text-white active:scale-95 transition-transform"
+                                        >
                                             <CheckIcon />
                                         </button>
-                                        <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Check Answer</span>
+                                        <span className="text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-widest">OK</span>
                                     </div>
                                 </div>
                             )}
                         </div>
                     </div>
+                    
+                    {/* Safe Area Footer Spacing */}
+                    <div className="h-6 w-full"></div>
                 </div>
             );
         };
